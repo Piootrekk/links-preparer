@@ -1,19 +1,22 @@
+// App.tsx
 import React, { useState, useRef, createRef } from "react";
 import { Input } from "@/components/ui/input";
-import MaskCard from "./MaskCard";
+import add from "@/icons/add.svg";
+import MaskCard, { MaskCardHandle } from "./MaskCard";
+import { v4 as uuidv4 } from "uuid";
+import { Button } from "./components/ui/button";
 
-type ContentRefs = {
-  inputRef: React.RefObject<HTMLInputElement>;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
+type ContentRef = {
+  ref: React.RefObject<MaskCardHandle>;
+  id: string;
 };
 
 const App: React.FC = () => {
   const linkRef = useRef<HTMLInputElement>(null);
-
-  const [contentRefs, setContentRefs] = useState<ContentRefs[]>([
+  const [contentRefs, setContentRefs] = useState<ContentRef[]>([
     {
-      inputRef: createRef<HTMLInputElement>(),
-      textareaRef: createRef<HTMLTextAreaElement>(),
+      ref: createRef<MaskCardHandle>(),
+      id: uuidv4(),
     },
   ]);
 
@@ -21,10 +24,30 @@ const App: React.FC = () => {
     setContentRefs((prevRefs) => [
       ...prevRefs,
       {
-        inputRef: createRef<HTMLInputElement>(),
-        textareaRef: createRef<HTMLTextAreaElement>(),
+        ref: createRef<MaskCardHandle>(),
+        id: uuidv4(),
       },
     ]);
+  };
+
+  const removeContent = (id: string) => {
+    setContentRefs((prevRefs) => prevRefs.filter((ref) => ref.id !== id));
+  };
+
+  const handleGenerate = () => {
+    let isValid = true;
+    contentRefs.forEach((contentRef) => {
+      if (contentRef.ref.current) {
+        const isCardValid = contentRef.ref.current.validate();
+        if (!isCardValid) {
+          isValid = false;
+        }
+      }
+    });
+
+    if (isValid) {
+      console.log("Generating link...");
+    }
   };
 
   return (
@@ -45,15 +68,25 @@ const App: React.FC = () => {
           />
         </div>
         <div className="flex flex-row flex-wrap items-stretch justify-center gap-x-4 gap-y-4 w-3/4 pt-16">
-          {contentRefs.map((refs, index) => (
+          {contentRefs.map((contentRef) => (
             <MaskCard
-              key={index}
-              inputRef={refs.inputRef}
-              textareaRef={refs.textareaRef}
+              key={contentRef.id}
+              ref={contentRef.ref}
+              onRemove={removeContent}
+              id={contentRef.id}
             />
           ))}
+          <div
+            className="flex flex-col justify-center items-center min-w-52 cursor-pointer"
+            onClick={addContent}
+          >
+            <img src={add} alt="Add" className=" size-12 text-green-700" />
+            <p>Add mask</p>
+          </div>
         </div>
-        <button onClick={addContent}>Add Content</button>
+        <Button variant="outline" onClick={handleGenerate}>
+          Generate
+        </Button>
       </div>
     </>
   );
