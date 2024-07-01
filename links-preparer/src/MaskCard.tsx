@@ -24,14 +24,14 @@ const MaskCard = forwardRef<MaskCardHandle, ContentProps>(
       validate: () => {
         const inputValue = inputRef.current?.value || "";
         const textareaValue = textareaRef.current?.value || "";
-        const regex = /\{\$[A-Z]+\}/;
+        const regex = /\{[A-Za-z]+\}/;
 
         if (!inputValue || inputValue.trim() === "") {
           setError("Mask name cannot be empty");
           return false;
         }
         if (!regex.test(inputValue)) {
-          setError("Mask must be in format {$MASK}");
+          setError("Mask must be in format {MASK}");
           return false;
         }
         if (!textareaValue || textareaValue.trim() === "") {
@@ -46,6 +46,10 @@ const MaskCard = forwardRef<MaskCardHandle, ContentProps>(
           maskName: inputRef.current!.value,
           content: textareaRef.current!.value,
         };
+      },
+      set value({ maskName, content }) {
+        inputRef.current!.value = maskName;
+        textareaRef.current!.value = content;
       },
     }));
 
