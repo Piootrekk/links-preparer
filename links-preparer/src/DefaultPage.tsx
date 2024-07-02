@@ -64,16 +64,36 @@ const DefaultPage: React.FC = () => {
     });
 
     if (isValid) {
-      contentRefs.forEach((contentRef) => {
-        if (contentRef.ref.current) {
-          const { maskName, content } = contentRef.ref.current.value;
-          const splitContent = content.split("\n");
-          const links = splitContent.map((line) => {
-            return linkRef.current!.value.replace(maskName, line.trim());
-          });
-          setLinks((prevLinks) => [...prevLinks, ...links]);
-        }
+      setLinks([]);
+      const dataItems = contentRefs.map((contentRef) => {
+        return {
+          maskName: contentRef.ref.current!.value.maskName,
+          contentValues: contentRef.ref.current!.value.content.split("\n"),
+        };
       });
+      const links: string[] = [];
+      dataItems[0].contentValues.forEach((contentValue) => {
+        links.push(
+          linkRef.current!.value.replace(
+            dataItems[0].maskName,
+            contentValue.trim()
+          )
+        );
+      });
+
+      for (let i = 1; i < dataItems.length; i++) {
+        const newLinks: string[] = [];
+        links.forEach((link) => {
+          dataItems[i].contentValues.forEach((contentValue) => {
+            newLinks.push(
+              link.replace(dataItems[i].maskName, contentValue.trim())
+            );
+          });
+        });
+        links.splice(0, links.length, ...newLinks);
+      }
+
+      setLinks(links);
     }
   };
 
