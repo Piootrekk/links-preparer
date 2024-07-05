@@ -12,10 +12,14 @@ export type MaskCardHandle = {
 type ContentProps = {
   onRemove: (id: string) => void;
   id: string;
+  defaultValue?: {
+    maskName?: string;
+    content?: string;
+  };
 };
 
 const MaskCard = forwardRef<MaskCardHandle, ContentProps>(
-  ({ onRemove, id }, ref) => {
+  ({ onRemove, id, defaultValue }, ref) => {
     const [error, setError] = useState<string>("");
     const inputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -70,9 +74,17 @@ const MaskCard = forwardRef<MaskCardHandle, ContentProps>(
         </CardHeader>
         <CardContent className="">
           <p className="px-2">Add mask name:</p>
-          <Input ref={inputRef} placeholder="Mask name" />
+          <Input
+            ref={inputRef}
+            placeholder="Mask name"
+            defaultValue={defaultValue?.maskName || ""}
+          />
           <p className="px-2 mt-2">Content:</p>
-          <Textarea ref={textareaRef} placeholder="Content" />
+          <Textarea
+            ref={textareaRef}
+            placeholder="Content"
+            defaultValue={defaultValue?.content || ""}
+          />
           {error && (
             <p className="text-red-500 text-sm text-center text-wrap px-2">
               {error}

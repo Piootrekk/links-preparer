@@ -4,6 +4,7 @@ export type LinkTemplate = {
 };
 
 export type PreparedLinks = {
+  id: string;
   link: string;
   inputValues: string[];
   areaValues: string[];

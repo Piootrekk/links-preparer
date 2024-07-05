@@ -13,13 +13,13 @@ const Content: React.FC<ContentProps> = ({ links, items }) => {
           <CardContent>
             <div className="flex flex-col justify-center items-center gap-y-4">
               <h2 className="text-2xl font-bold">Generated links:</h2>
-              <div className="flex flex-col justify-center items-center gap-y-2 w-3/4 p-12">
+              <div className="flex flex-col justify-center items-center gap-y-4 w-full p-12">
                 {links.map((link, index) => (
                   <a
                     key={index}
                     href={link}
                     target="_blank"
-                    className="underline  w-4/5  text-base overflow-hidden text-ellipsis whitespace-nowrap"
+                    className="underline w-3/4 text-base break-all"
                   >
                     {items ? items[index] : link}
                   </a>

@@ -5,10 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import add from "@/icons/add.svg";
 import { v4 as uuidv4 } from "uuid";
+import useLinksContext from "./context/LinksContext";
+import SelectData from "./SelectData";
 
 type ContentRef = {
   ref: React.RefObject<MaskCardHandle>;
   id: string;
+  initValue?: {
+    maskName?: string;
+    content?: string;
+  };
 };
 
 const isMaskInBaseLink = (baseLink: string, mask: string) => {
@@ -17,12 +23,16 @@ const isMaskInBaseLink = (baseLink: string, mask: string) => {
 
 const DefaultPage: React.FC = () => {
   const linkRef = useRef<HTMLInputElement>(null);
+  const { setLinks } = useLinksContext();
   const [error, setError] = useState<string>("");
-  const [links, setLinks] = useState<string[]>([]);
+  const [endlinks, setEndLinks] = useState<string[]>([]);
   const [contentRefs, setContentRefs] = useState<ContentRef[]>([
     {
       ref: createRef<MaskCardHandle>(),
       id: uuidv4(),
+      initValue: {
+        maskName: "{NAME}",
+      },
     },
   ]);
 
@@ -40,8 +50,27 @@ const DefaultPage: React.FC = () => {
     setContentRefs((prevRefs) => prevRefs.filter((ref) => ref.id !== id));
   };
 
+  const saveTemplate = () => {
+    if (contentRefs.length === 0) return;
+    const inputValues = contentRefs.map((contentRef) => {
+      return contentRef.ref.current!.value.maskName;
+    });
+    const areaValues = contentRefs.map((contentRef) => {
+      return contentRef.ref.current!.value.content;
+    });
+    setLinks((prevLinks) => [
+      ...prevLinks,
+      {
+        id: uuidv4(),
+        link: linkRef.current!.value,
+        inputValues,
+        areaValues,
+      },
+    ]);
+  };
+
   const handleGenerate = () => {
-    if (links.length > 0) setLinks([]);
+    if (endlinks.length > 0) setEndLinks([]);
     let isValid = true;
     contentRefs.forEach((contentRef) => {
       if (contentRef.ref.current) {
@@ -65,13 +94,14 @@ const DefaultPage: React.FC = () => {
 
     if (isValid) {
       setLinks([]);
+      const links: string[] = [];
       const dataItems = contentRefs.map((contentRef) => {
         return {
           maskName: contentRef.ref.current!.value.maskName,
           contentValues: contentRef.ref.current!.value.content.split("\n"),
         };
       });
-      const links: string[] = [];
+
       dataItems[0].contentValues.forEach((contentValue) => {
         links.push(
           linkRef.current!.value.replace(
@@ -93,7 +123,7 @@ const DefaultPage: React.FC = () => {
         links.splice(0, links.length, ...newLinks);
       }
 
-      setLinks(links);
+      setEndLinks(links);
     }
   };
 
@@ -114,6 +144,7 @@ const DefaultPage: React.FC = () => {
             ref={linkRef}
           />
         </div>
+        <SelectData />
         <div className="flex flex-row flex-wrap items-stretch justify-center gap-x-4 gap-y-4 w-3/4 pt-16">
           {contentRefs.map((contentRef) => (
             <MaskCard
@@ -121,6 +152,7 @@ const DefaultPage: React.FC = () => {
               ref={contentRef.ref}
               onRemove={removeContent}
               id={contentRef.id}
+              defaultValue={contentRef.initValue}
             />
           ))}
           <div className="flex flex-col justify-center items-center min-w-52 ">
@@ -128,7 +160,7 @@ const DefaultPage: React.FC = () => {
               className="flex flex-col justify-center items-center cursor-pointer p-2"
               onClick={addContent}
             >
-              <img src={add} alt="Add" className=" size-12" />
+              <img src={add} alt="Add" className="size-12" />
               <p>Add mask</p>
             </button>
           </div>
@@ -138,11 +170,16 @@ const DefaultPage: React.FC = () => {
             {error}
           </p>
         )}
-        <Button variant="outline" onClick={handleGenerate} size="lg">
-          Generate
-        </Button>
+        <div className="flex flex-row justify-center items-center gap-5 flex-wrap">
+          <Button variant="outline" onClick={saveTemplate} size="lg">
+            Save
+          </Button>
+          <Button variant="outline" onClick={handleGenerate} size="lg">
+            Generate
+          </Button>
+        </div>
         <div className="flex flex-row flex-wrap items-stretch justify-center gap-x-4 gap-y-4 w-3/4 pt-6">
-          {links.length > 0 && <Content links={links} />}
+          {endlinks.length > 0 && <Content links={endlinks} />}
         </div>
       </div>
     </>

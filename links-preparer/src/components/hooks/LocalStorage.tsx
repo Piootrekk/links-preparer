@@ -2,14 +2,14 @@ import { useState, useEffect } from "react";
 
 export const getData = (key: string) => {
   const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : undefined;
+  return data ? JSON.parse(data) : [];
 };
 
 export const setData = (key: string, data: any) => {
   localStorage.setItem(key, JSON.stringify(data));
 };
 
-const useLocalStorage = <T,>(key: string, initialValue: T) => {
+const useLocalStorage = <T,>(key: string, initialValue?: T) => {
   const [value, setValue] = useState<T>(() => getData(key) || initialValue);
 
   useEffect(() => {
