@@ -1,188 +1,118 @@
-import { useRef, useState, createRef } from "react";
-import Content from "./Content";
-import MaskCard, { MaskCardHandle } from "./MaskCard";
+import { useRef, useState } from "react";
+import MaskCard, { MaskType } from "./MaskCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import add from "@/icons/add.svg";
 import { v4 as uuidv4 } from "uuid";
-import useLinksContext from "./context/LinksContext";
-import SelectData from "./SelectData";
-
-type ContentRef = {
-  ref: React.RefObject<MaskCardHandle>;
-  id: string;
-  initValue?: {
-    maskName?: string;
-    content?: string;
-  };
-};
-
-const isMaskInBaseLink = (baseLink: string, mask: string) => {
-  return baseLink.includes(mask);
-};
 
 const DefaultPage: React.FC = () => {
   const linkRef = useRef<HTMLInputElement>(null);
-  const { setLinks } = useLinksContext();
-  const [error, setError] = useState<string>("");
-  const [endlinks, setEndLinks] = useState<string[]>([]);
-  const [contentRefs, setContentRefs] = useState<ContentRef[]>([
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const [masks, setMasks] = useState<MaskType[]>([
     {
-      ref: createRef<MaskCardHandle>(),
       id: uuidv4(),
-      initValue: {
-        maskName: "{NAME}",
-      },
+      mask: { name: "name", defaultValue: "{NAME}" },
+      content: { name: "content", defaultValue: "" },
     },
   ]);
 
-  const addContent = () => {
-    setContentRefs((prevRefs) => [
-      ...prevRefs,
-      {
-        ref: createRef<MaskCardHandle>(),
-        id: uuidv4(),
-      },
-    ]);
+  const handleSetError = (id: string, error: string) => {
+    setMasks((prevMasks) =>
+      prevMasks.map((mask) => (mask.id === id ? { ...mask, error } : mask))
+    );
   };
 
-  const removeContent = (id: string) => {
-    setContentRefs((prevRefs) => prevRefs.filter((ref) => ref.id !== id));
-  };
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const dataForm = new FormData(formRef.current!);
+    let hasError = false;
 
-  const saveTemplate = () => {
-    if (contentRefs.length === 0) return;
-    const inputValues = contentRefs.map((contentRef) => {
-      return contentRef.ref.current!.value.maskName;
-    });
-    const areaValues = contentRefs.map((contentRef) => {
-      return contentRef.ref.current!.value.content;
-    });
-    setLinks((prevLinks) => [
-      ...prevLinks,
-      {
-        id: uuidv4(),
-        link: linkRef.current!.value,
-        inputValues,
-        areaValues,
-      },
-    ]);
-  };
+    masks.forEach((mask) => {
+      const maskName = dataForm.get(mask.mask?.name || "");
+      const contentName = dataForm.get(mask.content?.name || "");
 
-  const handleGenerate = () => {
-    if (endlinks.length > 0) setEndLinks([]);
-    let isValid = true;
-    contentRefs.forEach((contentRef) => {
-      if (contentRef.ref.current) {
-        const isCardValid = contentRef.ref.current.validate();
-        if (!isCardValid) {
-          isValid = false;
-          return;
-        }
-        if (
-          !isMaskInBaseLink(
-            linkRef.current!.value,
-            contentRef.ref.current.value.maskName
-          )
-        ) {
-          isValid = false;
-          setError("Mask is not in base URL");
-          return;
-        }
+      if (!maskName) {
+        handleSetError(mask.id, "Mask name is required.");
+        hasError = true;
+      } else if (!contentName) {
+        handleSetError(mask.id, "Content is required.");
+        hasError = true;
+      } else {
+        handleSetError(mask.id, "");
       }
     });
 
-    if (isValid) {
-      setLinks([]);
-      const links: string[] = [];
-      const dataItems = contentRefs.map((contentRef) => {
-        return {
-          maskName: contentRef.ref.current!.value.maskName,
-          contentValues: contentRef.ref.current!.value.content.split("\n"),
-        };
-      });
-
-      dataItems[0].contentValues.forEach((contentValue) => {
-        links.push(
-          linkRef.current!.value.replace(
-            dataItems[0].maskName,
-            contentValue.trim()
-          )
-        );
-      });
-
-      for (let i = 1; i < dataItems.length; i++) {
-        const newLinks: string[] = [];
-        links.forEach((link) => {
-          dataItems[i].contentValues.forEach((contentValue) => {
-            newLinks.push(
-              link.replace(dataItems[i].maskName, contentValue.trim())
-            );
-          });
-        });
-        links.splice(0, links.length, ...newLinks);
-      }
-
-      setEndLinks(links);
+    if (!hasError) {
+      console.log("Form submitted successfully!");
     }
   };
 
+  const addMask = () => {
+    const id = uuidv4();
+    setMasks([
+      ...masks,
+      {
+        id: id,
+        mask: { name: "name", defaultValue: "" },
+        content: { name: "content", defaultValue: "" },
+      },
+    ]);
+  };
+
+  const removeMask = (id: string) => {
+    setMasks((prev) => prev.filter((mask) => mask.id !== id));
+  };
+
   return (
-    <>
-      <div className="flex flex-col justify-center items-center py-20 gap-y-6">
-        <h1 className="text-4xl font-bold">Link preparer</h1>
-        <div className="flex flex-row justify-center items-center w-1/2">
-          <p className="text-xl font-semibold whitespace-nowrap mr-4">
-            Base URL:
-          </p>
-          <Input
-            placeholder="Base URL"
-            className="flex-grow"
-            defaultValue={
-              "https://steamcommunity.com/market/listings/730/{NAME}"
-            }
-            ref={linkRef}
-          />
-        </div>
-        <SelectData />
+    <div className="flex flex-col justify-center items-center py-20 gap-y-6">
+      <h1 className="text-4xl font-bold">Link preparer</h1>
+      <div className="flex flex-row justify-center items-center w-1/2">
+        <p className="text-xl font-semibold whitespace-nowrap mr-4">
+          Base URL:
+        </p>
+        <Input
+          placeholder="Base URL"
+          className="flex-grow"
+          defaultValue={"https://steamcommunity.com/market/listings/730/{NAME}"}
+          ref={linkRef}
+        />
+      </div>
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="w-full flex flex-col items-center"
+      >
         <div className="flex flex-row flex-wrap items-stretch justify-center gap-x-4 gap-y-4 w-3/4 pt-16">
-          {contentRefs.map((contentRef) => (
+          {masks.map((mask) => (
             <MaskCard
-              key={contentRef.id}
-              ref={contentRef.ref}
-              onRemove={removeContent}
-              id={contentRef.id}
-              defaultValue={contentRef.initValue}
+              key={mask.id}
+              {...mask}
+              onRemove={removeMask}
+              setError={handleSetError}
             />
           ))}
-          <div className="flex flex-col justify-center items-center min-w-52 ">
+          <div className="flex flex-col justify-center items-center min-w-52">
             <button
+              type="button"
               className="flex flex-col justify-center items-center cursor-pointer p-2"
-              onClick={addContent}
+              onClick={addMask}
             >
               <img src={add} alt="Add" className="size-12" />
               <p>Add mask</p>
             </button>
           </div>
         </div>
-        {error && (
-          <p className="text-red-500 text-sm text-center text-wrap px-2">
-            {error}
-          </p>
-        )}
-        <div className="flex flex-row justify-center items-center gap-5 flex-wrap">
-          <Button variant="outline" onClick={saveTemplate} size="lg">
+        <div className="flex flex-row justify-center items-center gap-5 flex-wrap pt-6">
+          <Button variant="outline" type="button" onClick={() => {}} size="lg">
             Save
           </Button>
-          <Button variant="outline" onClick={handleGenerate} size="lg">
+          <Button variant="outline" type="submit" size="lg">
             Generate
           </Button>
         </div>
-        <div className="flex flex-row flex-wrap items-stretch justify-center gap-x-4 gap-y-4 w-3/4 pt-6">
-          {endlinks.length > 0 && <Content links={endlinks} />}
-        </div>
-      </div>
-    </>
+      </form>
+    </div>
   );
 };
 
