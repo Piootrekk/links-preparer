@@ -4,56 +4,70 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import add from "@/icons/add.svg";
 import { v4 as uuidv4 } from "uuid";
+import MainPageWrapper from "./wrappers/MainPageWrapper";
+import useMaskItems from "./context/MaskItems";
 
 const DefaultPage: React.FC = () => {
   const linkRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [masks, setMasks] = useState<MaskType[]>([
-    {
-      id: uuidv4(),
-      mask: { name: "name", defaultValue: "{NAME}" },
-      content: { name: "content", defaultValue: "" },
-    },
-  ]);
+  const { maskData, setMaskData } = useMaskItems();
+  const [mask, setMask] = useState<MaskType[]>(
+    maskData.masks.length
+      ? maskData.masks.map((mask, index) => ({
+          id: uuidv4(),
+          mask: { name: "name", defaultValue: mask },
+          content: { name: "content", defaultValue: maskData.contents[index] },
+        }))
+      : [
+          {
+            id: uuidv4(),
+            mask: { name: "name", defaultValue: "{NAME}" },
+            content: { name: "content", defaultValue: "" },
+          },
+        ]
+  );
 
-  const handleSetError = (id: string, error: string) => {
-    setMasks((prevMasks) =>
-      prevMasks.map((mask) => (mask.id === id ? { ...mask, error } : mask))
-    );
-  };
+  const [errors, setErrors] = useState<string[]>(Array(mask.length).fill(""));
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const dataForm = new FormData(formRef.current!);
+    const maskNames = dataForm.getAll("name") as string[];
+    const contentNames = dataForm.getAll("content") as string[];
     let hasError = false;
+    let errors: string[] = [];
 
-    masks.forEach((mask) => {
-      const maskName = dataForm.get(mask.mask?.name || "");
-      const contentName = dataForm.get(mask.content?.name || "");
-
-      if (!maskName) {
-        handleSetError(mask.id, "Mask name is required.");
+    maskNames.forEach((name, index) => {
+      if (!name) {
+        errors[index] = "Mask is required";
         hasError = true;
-      } else if (!contentName) {
-        handleSetError(mask.id, "Content is required.");
+      } else if (!linkRef.current?.value.includes(name)) {
+        errors[index] = "Mask not found in link";
         hasError = true;
       } else {
-        handleSetError(mask.id, "");
+        errors[index] = "";
       }
     });
 
-    if (!hasError) {
-      console.log("Form submitted successfully!");
-    }
+    setErrors(errors);
+
+    if (hasError) return;
+
+    setErrors(Array(mask.length).fill(""));
+    setMaskData({
+      link: linkRef.current!.value,
+      masks: maskNames,
+      contents: contentNames,
+      isSet: true,
+    });
   };
 
   const addMask = () => {
-    const id = uuidv4();
-    setMasks([
-      ...masks,
+    setMask([
+      ...mask,
       {
-        id: id,
+        id: uuidv4(),
         mask: { name: "name", defaultValue: "" },
         content: { name: "content", defaultValue: "" },
       },
@@ -61,12 +75,11 @@ const DefaultPage: React.FC = () => {
   };
 
   const removeMask = (id: string) => {
-    setMasks((prev) => prev.filter((mask) => mask.id !== id));
+    setMask((prev) => prev.filter((mask) => mask.id !== id));
   };
 
   return (
-    <div className="flex flex-col justify-center items-center py-20 gap-y-6">
-      <h1 className="text-4xl font-bold">Link preparer</h1>
+    <MainPageWrapper>
       <div className="flex flex-row justify-center items-center w-1/2">
         <p className="text-xl font-semibold whitespace-nowrap mr-4">
           Base URL:
@@ -84,12 +97,12 @@ const DefaultPage: React.FC = () => {
         className="w-full flex flex-col items-center"
       >
         <div className="flex flex-row flex-wrap items-stretch justify-center gap-x-4 gap-y-4 w-3/4 pt-16">
-          {masks.map((mask) => (
+          {mask.map((mask, index) => (
             <MaskCard
               key={mask.id}
               {...mask}
               onRemove={removeMask}
-              setError={handleSetError}
+              error={errors[index]}
             />
           ))}
           <div className="flex flex-col justify-center items-center min-w-52">
@@ -112,7 +125,7 @@ const DefaultPage: React.FC = () => {
           </Button>
         </div>
       </form>
-    </div>
+    </MainPageWrapper>
   );
 };
 

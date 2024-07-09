@@ -1,13 +1,20 @@
+import { useState } from "react";
+import { MaskData, MaskItems } from "./context/MaskItems";
 import DefaultPage from "./DefaultPage";
-import { PreparedLinks } from "./types/LinkTemplate";
-import useLocalStorage from "./components/hooks/LocalStorage";
-import { LinksContext } from "./context/LinksContext";
+import LinksDisplayer from "./LinksDisplayer";
+
 const App: React.FC = () => {
-  const [links, setLinks] = useLocalStorage<PreparedLinks[]>("links", []);
+  const [maskData, setMaskData] = useState<MaskData>({
+    link: "",
+    masks: [],
+    contents: [],
+    isSet: false,
+  });
+
   return (
-    <LinksContext.Provider value={{ links, setLinks }}>
-      <DefaultPage />
-    </LinksContext.Provider>
+    <MaskItems.Provider value={{ maskData, setMaskData }}>
+      {maskData.isSet ? <LinksDisplayer /> : <DefaultPage />}
+    </MaskItems.Provider>
   );
 };
 

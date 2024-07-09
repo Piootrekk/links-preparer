@@ -13,12 +13,14 @@ export type MaskType = {
     name?: string;
     defaultValue?: string;
   };
-  onRemove?: (id: string) => void;
-  error?: string;
-  setError?: (id: string, error: string) => void;
 };
 
-const MaskCard: React.FC<MaskType> = ({
+type MaskCardProps = MaskType & {
+  onRemove?: (id: string) => void;
+  error?: string;
+};
+
+const MaskCard: React.FC<MaskCardProps> = ({
   id,
   mask,
   content,
