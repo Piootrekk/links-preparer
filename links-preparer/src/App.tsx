@@ -6,8 +6,7 @@ import LinksDisplayer from "./LinksDisplayer";
 const App: React.FC = () => {
   const [maskData, setMaskData] = useState<MaskData>({
     link: "",
-    masks: [],
-    contents: [],
+    items: [],
     isSet: false,
   });
 

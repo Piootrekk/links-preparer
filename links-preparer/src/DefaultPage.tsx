@@ -7,17 +7,22 @@ import { v4 as uuidv4 } from "uuid";
 import MainPageWrapper from "./wrappers/MainPageWrapper";
 import useMaskItems from "./context/MaskItems";
 
+const MockURL = "https://steamcommunity.com/market/listings/730/{NAME}";
+
 const DefaultPage: React.FC = () => {
   const linkRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const { maskData, setMaskData } = useMaskItems();
   const [mask, setMask] = useState<MaskType[]>(
-    maskData.masks.length
-      ? maskData.masks.map((mask, index) => ({
+    maskData.items.length
+      ? maskData.items.map((item) => ({
           id: uuidv4(),
-          mask: { name: "name", defaultValue: mask },
-          content: { name: "content", defaultValue: maskData.contents[index] },
+          mask: { name: "name", defaultValue: item.mask },
+          content: {
+            name: "content",
+            defaultValue: item.contents.join("\n").trim(),
+          },
         }))
       : [
           {
@@ -57,8 +62,10 @@ const DefaultPage: React.FC = () => {
     setErrors(Array(mask.length).fill(""));
     setMaskData({
       link: linkRef.current!.value,
-      masks: maskNames,
-      contents: contentNames,
+      items: maskNames.map((mask, index) => ({
+        mask: mask,
+        contents: contentNames[index].split("\n"),
+      })),
       isSet: true,
     });
   };
@@ -87,7 +94,7 @@ const DefaultPage: React.FC = () => {
         <Input
           placeholder="Base URL"
           className="flex-grow"
-          defaultValue={"https://steamcommunity.com/market/listings/730/{NAME}"}
+          defaultValue={maskData.link ? maskData.link : MockURL}
           ref={linkRef}
         />
       </div>

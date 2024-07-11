@@ -2,8 +2,10 @@ import { createContext, useContext } from "react";
 
 export type MaskData = {
   link: string;
-  masks: string[];
-  contents: string[];
+  items: {
+    mask: string;
+    contents: string[];
+  }[];
   isSet: boolean;
 };
 
