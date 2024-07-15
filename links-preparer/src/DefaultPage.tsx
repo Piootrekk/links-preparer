@@ -6,6 +6,7 @@ import add from "@/icons/add.svg";
 import { v4 as uuidv4 } from "uuid";
 import MainPageWrapper from "./wrappers/MainPageWrapper";
 import useMaskItems from "./context/MaskItems";
+import PopupSave from "./PopupSave";
 
 const MockURL = "https://steamcommunity.com/market/listings/730/{NAME}";
 
@@ -32,6 +33,13 @@ const DefaultPage: React.FC = () => {
           },
         ]
   );
+
+  const transformedMask = {
+    items: mask.map((item) => ({
+      mask: item.mask!.defaultValue || "",
+      contents: item.content!.defaultValue!.split("\n"),
+    })),
+  };
 
   const [errors, setErrors] = useState<string[]>(Array(mask.length).fill(""));
 
@@ -124,9 +132,10 @@ const DefaultPage: React.FC = () => {
           </div>
         </div>
         <div className="flex flex-row justify-center items-center gap-5 flex-wrap pt-6">
-          <Button variant="outline" type="button" onClick={() => {}} size="lg">
-            Save
-          </Button>
+          <PopupSave
+            items={transformedMask.items}
+            link={linkRef.current?.value || ""}
+          />
           <Button variant="outline" type="submit" size="lg">
             Generate
           </Button>

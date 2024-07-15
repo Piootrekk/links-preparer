@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 
+export const clearData = (key: string) => {
+  localStorage.removeItem(key);
+};
+
 export const getData = (key: string) => {
   const data = localStorage.getItem(key);
   return data ? JSON.parse(data) : [];
