@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from "uuid";
 import MainPageWrapper from "./wrappers/MainPageWrapper";
 import useMaskItems from "./context/MaskItems";
 import PopupSave from "./PopupSave";
+import SelectSaved from "./SelectSaved";
+import { SaveTemplateType } from "./context/SaveItems";
 
 const MockURL = "https://steamcommunity.com/market/listings/730/{NAME}";
 
@@ -15,7 +17,7 @@ const DefaultPage: React.FC = () => {
   const formRef = useRef<HTMLFormElement>(null);
 
   const { maskData, setMaskData } = useMaskItems();
-  const [mask, setMask] = useState<MaskType[]>(
+  const [masks, setMasks] = useState<MaskType[]>(
     maskData.items.length
       ? maskData.items.map((item) => ({
           id: uuidv4(),
@@ -33,15 +35,7 @@ const DefaultPage: React.FC = () => {
           },
         ]
   );
-
-  const transformedMask = {
-    items: mask.map((item) => ({
-      mask: item.mask!.defaultValue || "",
-      contents: item.content!.defaultValue!.split("\n"),
-    })),
-  };
-
-  const [errors, setErrors] = useState<string[]>(Array(mask.length).fill(""));
+  const [errors, setErrors] = useState<string[]>(Array(masks.length).fill(""));
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -67,7 +61,7 @@ const DefaultPage: React.FC = () => {
 
     if (hasError) return;
 
-    setErrors(Array(mask.length).fill(""));
+    setErrors(Array(masks.length).fill(""));
     setMaskData({
       link: linkRef.current!.value,
       items: maskNames.map((mask, index) => ({
@@ -79,8 +73,8 @@ const DefaultPage: React.FC = () => {
   };
 
   const addMask = () => {
-    setMask([
-      ...mask,
+    setMasks([
+      ...masks,
       {
         id: uuidv4(),
         mask: { name: "name", defaultValue: "" },
@@ -90,7 +84,21 @@ const DefaultPage: React.FC = () => {
   };
 
   const removeMask = (id: string) => {
-    setMask((prev) => prev.filter((mask) => mask.id !== id));
+    setMasks((prev) => prev.filter((mask) => mask.id !== id));
+  };
+
+  const getFormValues = (): Partial<SaveTemplateType> => {
+    const dataForm = new FormData(formRef.current!);
+    const maskNames = dataForm.getAll("name") as string[];
+    const contentNames = dataForm.getAll("content") as string[];
+
+    return {
+      items: maskNames.map((mask, index) => ({
+        mask: mask,
+        contents: contentNames[index].split("\n"),
+      })),
+      link: linkRef.current!.value,
+    };
   };
 
   return (
@@ -106,13 +114,14 @@ const DefaultPage: React.FC = () => {
           ref={linkRef}
         />
       </div>
+      <SelectSaved setMask={setMasks} />
       <form
         ref={formRef}
         onSubmit={handleSubmit}
         className="w-full flex flex-col items-center"
       >
         <div className="flex flex-row flex-wrap items-stretch justify-center gap-x-4 gap-y-4 w-3/4 pt-16">
-          {mask.map((mask, index) => (
+          {masks.map((mask, index) => (
             <MaskCard
               key={mask.id}
               {...mask}
@@ -132,10 +141,7 @@ const DefaultPage: React.FC = () => {
           </div>
         </div>
         <div className="flex flex-row justify-center items-center gap-5 flex-wrap pt-6">
-          <PopupSave
-            items={transformedMask.items}
-            link={linkRef.current?.value || ""}
-          />
+          <PopupSave getFormValues={getFormValues} />
           <Button variant="outline" type="submit" size="lg">
             Generate
           </Button>

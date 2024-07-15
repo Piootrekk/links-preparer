@@ -7,17 +7,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useRef, useState } from "react";
-import useSaveItems from "./context/SaveItems";
+import useSaveItems, { SaveTemplateType } from "./context/SaveItems";
 
 type PopupSaveProps = {
-  items: {
-    mask: string;
-    contents: string[];
-  }[];
-  link: string;
+  getFormValues: () => Partial<SaveTemplateType>;
 };
 
-const PopupSave: React.FC<PopupSaveProps> = ({ items, link }) => {
+const PopupSave: React.FC<PopupSaveProps> = ({ getFormValues }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string>("");
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -31,9 +27,14 @@ const PopupSave: React.FC<PopupSaveProps> = ({ items, link }) => {
     setError("");
     setIsPopoverOpen(false);
     const newName = inputRef.current!.value;
+    const { items, link } = getFormValues();
+    if (!items || !link) {
+      setError("No items to save");
+      return;
+    }
     const newItem = { name: newName, items, link };
     const existingIndex = saveData.findIndex((item) => item.name === newName);
-    
+
     let newSaveData;
     if (existingIndex !== -1) {
       newSaveData = saveData.map((item, index) =>
