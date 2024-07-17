@@ -13,9 +13,10 @@ import { v4 as uuidv4 } from "uuid";
 
 type SelectSavedProps = {
   setMask: (mask: MaskType[]) => void;
+  setLink: (link: string) => void;
 };
 
-const SelectSaved: React.FC<SelectSavedProps> = ({ setMask }) => {
+const SelectSaved: React.FC<SelectSavedProps> = ({ setMask, setLink }) => {
   const { saveData } = useSaveItems();
 
   const handleSelect = (name: string) => {
@@ -30,10 +31,11 @@ const SelectSaved: React.FC<SelectSavedProps> = ({ setMask }) => {
         }))
       );
     }
+    setLink(selected?.link || "");
   };
 
   return (
-    <div className="flex flex-row justify-center items-center w-1/5">
+    <div className="flex flex-row justify-center items-center w-1/6 ">
       <Select onValueChange={handleSelect}>
         <SelectTrigger className="flex-grow">
           <SelectValue placeholder="Select a saved template..." />

@@ -72,6 +72,12 @@ const DefaultPage: React.FC = () => {
     });
   };
 
+  const setLink = (newLink: string) => {
+    if (linkRef.current) {
+      linkRef.current.value = newLink;
+    }
+  };
+
   const addMask = () => {
     setMasks([
       ...masks,
@@ -97,7 +103,7 @@ const DefaultPage: React.FC = () => {
         mask: mask,
         contents: contentNames[index].split("\n"),
       })),
-      link: linkRef.current!.value,
+      link: linkRef.current ? linkRef.current.value : "",
     };
   };
 
@@ -114,7 +120,7 @@ const DefaultPage: React.FC = () => {
           ref={linkRef}
         />
       </div>
-      <SelectSaved setMask={setMasks} />
+      <SelectSaved setMask={setMasks} setLink={setLink} />
       <form
         ref={formRef}
         onSubmit={handleSubmit}
