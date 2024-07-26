@@ -1,46 +1,59 @@
-import { cn } from "@/lib/utils";
-import { useState } from "react";
+//  Do naprawy kiedyśtam
 
-type EditableDivProps = {
-  className?: string;
-};
+import React, { useState, useRef, useEffect } from "react";
 
-const EditableDiv: React.FC<EditableDivProps> = ({ className }) => {
-  const [text, setText] = useState(
-    "This is some default text with {CENA} and {URL} that should be highlighted."
-  );
+interface TextareaWithHighlightProps {
+  highlightWords: string[];
+}
 
-  const highlightWords = (inputText: string) => {
-    const wordsToHighlight = ["{CENA}", "{URL}"];
-    let formattedText = inputText;
+const TextareaWithHighlight: React.FC<TextareaWithHighlightProps> = ({
+  highlightWords,
+}) => {
+  const [text, setText] = useState("");
+  const highlightRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    wordsToHighlight.forEach((word) => {
-      const regex = new RegExp(`(${word})`, "g");
-      formattedText = formattedText.replace(
-        regex,
-        `<span class="bg-yellow-200 font-bold">$1</span>`
-      );
-    });
+  useEffect(() => {
+    if (highlightRef.current && textareaRef.current) {
+      highlightRef.current.scrollTop = textareaRef.current.scrollTop;
+    }
+  }, [text]);
 
-    return formattedText;
+  const handleScroll = () => {
+    if (highlightRef.current && textareaRef.current) {
+      highlightRef.current.scrollTop = textareaRef.current.scrollTop;
+      highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
+    }
   };
 
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    const inputText = e.currentTarget.innerText;
-    setText(inputText);
+  const getHighlightedText = () => {
+    let html = text;
+    highlightWords.forEach((word) => {
+      const regex = new RegExp(`(${word})`, "gi");
+      html = html.replace(
+        regex,
+        "<span class='font-bold text-blue-600'>$1</span>"
+      );
+    });
+    return { __html: html };
   };
 
   return (
-    <div
-      className={cn(
-        className,
-        "rounded-xl border bg-card text-card-foreground shadow h-[400px] w-[600px] text-gray-500 focus:outline-none"
-      )}
-      contentEditable
-      onInput={handleInput}
-      dangerouslySetInnerHTML={{ __html: highlightWords(text) }}
-    ></div>
+    <div className="relative">
+      <textarea
+        ref={textareaRef}
+        className="absolute border rounded-md inset-0 w-[400px] h-[400px]  opacity-0 z-10 resize-none"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onScroll={handleScroll}
+      />
+      <div
+        ref={highlightRef}
+        className="absolute  rounded-md inset-0 w-[400px] border  h-[400px]  whitespace-pre-wrap break-words overflow-hidden pointer-events-none bg-transparent"
+        dangerouslySetInnerHTML={getHighlightedText()}
+      />
+    </div>
   );
 };
 
-export default EditableDiv;
+export default TextareaWithHighlight;

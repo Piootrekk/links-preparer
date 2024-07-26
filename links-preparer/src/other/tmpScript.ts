@@ -1,5 +1,4 @@
-export const temperMonkeyScript = `
-// ==UserScript==
+export const temperMonkeyScript = `// ==UserScript==
 // @name         New Userscript
 // @namespace    http://tampermonkey.net/
 // @version      2024-07-16

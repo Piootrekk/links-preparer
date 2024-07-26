@@ -10,7 +10,7 @@ import PopupSave from "./PopupSave";
 import SelectSaved from "./SelectSaved";
 import { SaveTemplateType } from "./context/SaveItems";
 
-const MockURL = "https://steamcommunity.com/market/listings/730/{NAME}";
+const MockURL = "https://google.com/{NAME}";
 
 const DefaultPage: React.FC = () => {
   const linkRef = useRef<HTMLInputElement>(null);
