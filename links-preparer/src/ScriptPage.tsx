@@ -39,7 +39,7 @@ const ScriptPage: React.FC<ScriptPageProps> = ({ links }) => {
           <ScriptAdjustment links={links} maskValues={maskValues} />
         )}
       </div>
-        {setupConfig && <ScriptSetup />}
+      {setupConfig && <ScriptSetup />}
     </>
   );
 };
@@ -70,13 +70,13 @@ const ScriptAdjustment: React.FC<ScriptAdjustmentProps> = ({
           ))}
         </div>
       </ScrollArea>
-      <div className="flex flex-col gap-4 order-2">
+      <div className="flex flex-col gap-4 order-3">
         {maskValues.map((mask, index) => (
           <MaskValueInputs key={index} defaultValueMask={mask.defalutValue} />
         ))}
       </div>
 
-      <div className="flex flex-col gap-2 order-3">
+      <div className="flex flex-col gap-2 order-2 justify-stretch">
         <textarea
           defaultValue={temperMonkeyScript}
           className="w-[400px] h-[400px] p-4 focus:outline-none border rounded-md text-sm"

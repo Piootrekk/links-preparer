@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import trashcan from "@/icons/trashcan.svg";
 
 export type MaskType = {
@@ -50,7 +49,8 @@ const MaskCard: React.FC<MaskCardProps> = ({
           name={mask?.name}
         />
         <p className="px-2 mt-2">Content:</p>
-        <Textarea
+        <textarea
+          className="p-4 h-full w-full focus:outline-none border rounded-md text-sm"
           placeholder="Content"
           defaultValue={content?.defaultValue}
           name={content?.name}

@@ -2,30 +2,31 @@ import add from "@/icons/add.svg";
 import trashcan from "@/icons/trashcan.svg";
 import { Button } from "./components/ui/button";
 
-import { useState } from "react";
 import MaskValueInputs from "./maskValueInputs";
+import { useState } from "react";
+import { temperMonkeyScript } from "./other/tmpScript";
 
 type ScriptSetupProps = {};
 
 const ScriptSetup: React.FC<ScriptSetupProps> = () => {
-  const [maskValues, setMaskValues] = useState<TMaskValue[]>([
-    { defalutValue: "" },
-  ]);
+  const [config, setConfig] = useState<string[]>([""]);
 
   const addInputs = () => {
-    setMaskValues((prev) => [...prev, { defalutValue: "" }]);
+    setConfig([...config, ""]);
   };
 
   const removeLastInput = () => {
-    setMaskValues((prev) => prev.slice(0, prev.length - 1));
+    if (config.length > 1) {
+      setConfig(config.slice(0, -1));
+    }
   };
 
   return (
     <>
-      <div className="flex flex-row justify-center gap-4 items-center min-w-24 py-4">
-        <div className="flex flex-col justify-center items-center min-w-24 py-4">
-          {maskValues.map((mask, index) => (
-            <MaskValueInputs key={index} defaultValueMask={mask.defalutValue} />
+      <form className="flex flex-row justify-center gap-4 items-center min-w-24 py-4">
+        <div className="flex flex-col justify-center items-center min-w-24 py-4 gap-y-2">
+          {config.map((_, index) => (
+            <MaskValueInputs key={index} />
           ))}
           <div className="flex flex-row justify-center items-center min-w-24 pt-2">
             <button
@@ -46,13 +47,17 @@ const ScriptSetup: React.FC<ScriptSetupProps> = () => {
             </button>
           </div>
         </div>
-        <textarea className="w-[400px] h-[400px] p-4 focus:outline-none border rounded-md text-sm"></textarea>
+        <textarea
+          className="w-[400px] h-[400px] p-4 focus:outline-none border rounded-md text-sm"
+          defaultValue={temperMonkeyScript}
+          required
+        ></textarea>
         <div className="flex flex-row flex-wrap gap-2 p-5 justify-center">
-          <Button variant="outline" size="default">
+          <Button variant="outline" size="default" type="button">
             Save setup
           </Button>
         </div>
-      </div>
+      </form>
     </>
   );
 };

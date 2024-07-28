@@ -37,6 +37,10 @@ const DefaultPage: React.FC = () => {
   );
   const [errors, setErrors] = useState<string[]>(Array(masks.length).fill(""));
 
+  const clearErrors = () => {
+    setErrors(Array(masks.length).fill(""));
+  };
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const dataForm = new FormData(formRef.current!);
@@ -61,7 +65,7 @@ const DefaultPage: React.FC = () => {
 
     if (hasError) return;
 
-    setErrors(Array(masks.length).fill(""));
+    clearErrors();
     setMaskData({
       link: linkRef.current!.value,
       items: maskNames.map((mask, index) => ({
@@ -120,7 +124,7 @@ const DefaultPage: React.FC = () => {
           ref={linkRef}
         />
       </div>
-      <SelectSaved setMask={setMasks} setLink={setLink} />
+      <SelectSaved setMask={setMasks} setLink={setLink} setErrors={setErrors} />
       <form
         ref={formRef}
         onSubmit={handleSubmit}
