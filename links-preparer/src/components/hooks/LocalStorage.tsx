@@ -6,7 +6,7 @@ export const clearData = (key: string) => {
 
 export const getData = (key: string) => {
   const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : [];
+  return data ? JSON.parse(data) : undefined;
 };
 
 export const setData = (key: string, data: any) => {

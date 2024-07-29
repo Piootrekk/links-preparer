@@ -1,26 +1,18 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { generatedLinks } from "./LinksDisplayer";
 import { Separator } from "@/components/ui/separator";
-import { temperMonkeyScript } from "./other/tmpScript";
-
-import MaskValueInputs from "./maskValueInputs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./components/ui/button";
 import ScriptSetup from "./ScriptSetup";
+import useConfigScript from "./components/hooks/ConfigScript";
+import MaskValueInputs from "./maskValueInputs";
 
 type ScriptPageProps = {
   links: generatedLinks[];
 };
 
-type TMaskValue = {
-  defalutValue: string;
-};
-
 const ScriptPage: React.FC<ScriptPageProps> = ({ links }) => {
   const [setupConfig, setSetupConfig] = useState<boolean>(false);
-  const [maskValues, setMaskValues] = useState<TMaskValue[]>([
-    { defalutValue: "" },
-  ]);
 
   return (
     <>
@@ -35,9 +27,7 @@ const ScriptPage: React.FC<ScriptPageProps> = ({ links }) => {
       </div>
 
       <div className="flex flex-row flex-wrap justify-center gap-5 ">
-        {!setupConfig && (
-          <ScriptAdjustment links={links} maskValues={maskValues} />
-        )}
+        {!setupConfig && <ScriptAdjustment links={links} />}
       </div>
       {setupConfig && <ScriptSetup />}
     </>
@@ -46,13 +36,15 @@ const ScriptPage: React.FC<ScriptPageProps> = ({ links }) => {
 
 type ScriptAdjustmentProps = {
   links: generatedLinks[];
-  maskValues: TMaskValue[];
 };
 
-const ScriptAdjustment: React.FC<ScriptAdjustmentProps> = ({
-  links,
-  maskValues,
-}) => {
+const ScriptAdjustment: React.FC<ScriptAdjustmentProps> = ({ links }) => {
+  const { config } = useConfigScript();
+
+  useEffect(() => {
+    console.log(config);
+  }, []);
+
   return (
     <>
       <ScrollArea className="h-[400px] rounded-md border px-2 py-6 order-1">
@@ -71,14 +63,18 @@ const ScriptAdjustment: React.FC<ScriptAdjustmentProps> = ({
         </div>
       </ScrollArea>
       <div className="flex flex-col gap-4 order-3">
-        {maskValues.map((mask, index) => (
-          <MaskValueInputs key={index} defaultValueMask={mask.defalutValue} />
-        ))}
+        {config &&
+          config.doubleInput.map((input, index) => (
+            <MaskValueInputs
+              key={index}
+              defaultValueMask={input.mask}
+              defaultValueValue={input.content}
+            />
+          ))}
       </div>
-
       <div className="flex flex-col gap-2 order-2 justify-stretch">
         <textarea
-          defaultValue={temperMonkeyScript}
+          defaultValue={config.script}
           className="w-[400px] h-[400px] p-4 focus:outline-none border rounded-md text-sm"
         ></textarea>
       </div>

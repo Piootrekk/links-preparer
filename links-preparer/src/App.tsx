@@ -12,7 +12,10 @@ const App: React.FC = () => {
     isSet: false,
   });
 
-  const [saveData, setSaveData] = useLocalStorage<SaveTemplateType[]>(nameKey);
+  const [saveData, setSaveData] = useLocalStorage<SaveTemplateType[]>(
+    nameKey,
+    []
+  );
 
   return (
     <MaskItems.Provider value={{ maskData, setMaskData }}>
