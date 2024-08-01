@@ -40,11 +40,31 @@ type ScriptAdjustmentProps = {
 
 const ScriptAdjustment: React.FC<ScriptAdjustmentProps> = ({ links }) => {
   const { config } = useConfigScript();
+  const scripts = Array.from({ length: links.length }).fill(
+    config.script
+  ) as string[];
+
+  const baseReplaceInScipt = (script: string, name: string, url: string) => {
+    return script.replace("{NAME}", name).replace("{LINK}", url);
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    
+    scripts.forEach((script, index) => {
+      let newScript = script;
+      newScript = baseReplaceInScipt(
+        script,
+        links[index].name,
+        links[index].link
+      );
+      config.doubleInput.forEach((_, index) => {
+        const mask = formData.get(`mask-${index}`) as string;
+        const content = formData.get(`content-${index}`) as string;
+        newScript = newScript.replace(mask, content);
+        scripts[index] = newScript;
+      });
+    });
   };
 
   return (
@@ -74,11 +94,12 @@ const ScriptAdjustment: React.FC<ScriptAdjustmentProps> = ({ links }) => {
                   {config &&
                     config.doubleInput.map((input, index) => (
                       <MaskValueInputs
+                        index={index}
                         key={index}
                         defaultValueMask={input.mask}
                         defaultValueValue={input.content}
                         requiredMask
-                        requiredValue
+                        readonlyMask
                       />
                     ))}
                 </div>

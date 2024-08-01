@@ -22,17 +22,19 @@ const ScriptSetup: React.FC<ScriptSetupProps> = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formDatas = new FormData(e.currentTarget);
-    const masks = formDatas.getAll("mask");
-    const values = formDatas.getAll("value");
-    const script = formDatas.get("script") as string;
-    setValue({
-      doubleInput: masks.map((mask, index) => ({
-        mask: mask as string,
-        content: values[index] as string,
-      })),
+    const formData = new FormData(e.currentTarget);
+
+    const doubleInput = config.doubleInput.map((_, index) => ({
+      mask: formData.get(`mask-${index}`) as string,
+      content: formData.get(`content-${index}`) as string,
+    }));
+
+    const script = formData.get("script") as string;
+    const newConfig: TConfig = {
+      doubleInput,
       script,
-    });
+    };
+    setValue(newConfig);
   };
 
   const clearCache = () => {
@@ -58,6 +60,7 @@ const ScriptSetup: React.FC<ScriptSetupProps> = () => {
           {config &&
             config.doubleInput.map((input, index) => (
               <MaskValueInputs
+                index={index}
                 key={index}
                 defaultValueMask={input.mask}
                 defaultValueValue={input.content}
