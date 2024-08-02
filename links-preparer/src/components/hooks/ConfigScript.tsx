@@ -38,6 +38,7 @@ const useConfigScript = () => {
       ],
     }));
   };
+
   const removeLiastDoubleInput = () => {
     if (config.doubleInput.length > 1) {
       setConfig((prev) => ({

@@ -30,7 +30,7 @@ const LinksDisplayer: React.FC<LinksDipslayerProps> = () => {
         maskData.items[0].mask,
         content.trim()
       );
-      firstInitLinks.push({ name: content, link });
+      firstInitLinks.push({ name: content, link: encodeURI(link) });
     });
 
     if (maskData.items.length === 1) return firstInitLinks;
@@ -42,12 +42,14 @@ const LinksDisplayer: React.FC<LinksDipslayerProps> = () => {
             maskData.items[i].mask,
             content.trim()
           );
-          newLinks.push({ name: link.name + " " + content, link: newLink });
+          newLinks.push({
+            name: link.name + " " + content,
+            link: encodeURI(newLink),
+          });
         });
       });
       generatedLinks.push(...newLinks);
     }
-
     return generatedLinks;
   };
 
